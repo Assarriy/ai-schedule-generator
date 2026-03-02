@@ -1,22 +1,28 @@
 import 'dart:convert'; // Untuk encode/decode JSON
 import 'package:http/http.dart' as http;
+import 'package:flutter_dotenv/flutter_dotenv.dart'; // Import dotenv
 
 class GeminiService {
-  // API Key - GANTI dengan milikmu (jangan hardcode di production!)
-  static const String apiKey = "AIzaSyBhuRY_Vd6PybsWYeu1ooglWnENy82LMYY";
+  // Mengambil API Key dari file .env secara dinamis
+  static String get apiKey => dotenv.env['GEMINI_API_KEY'] ?? "";
 
   // Gunakan model stabil terbaru (per 2026: gemini-1.5-flash atau gemini-1.5-flash-latest)
-  static const String model =
-      "gemini-1.5-flash"; // atau "gemini-1.5-flash-latest"
+  static const String model = "gemini-1.5-flash";
 
   // Endpoint resmi Gemini generateContent
   static const String baseUrl =
-      "https://generativelanguage.googleapis.com/v1beta/models/gemini-flash-latest:generateContent";
+      "https://generativelanguage.googleapis.com/v1beta/models/gemini-1.5-flash-latest:generateContent";
 
-  // ... (methods di step berikutnya)
   static Future<String> generateSchedule(
     List<Map<String, dynamic>> tasks,
   ) async {
+    // Validasi pencegahan jika API Key kosong/tidak terbaca
+    if (apiKey.isEmpty) {
+      throw Exception(
+        "API Key tidak ditemukan. Pastikan file .env sudah dikonfigurasi dan dimuat.",
+      );
+    }
+
     try {
       // Bangun prompt dari data tugas
       final prompt = _buildPrompt(tasks);
@@ -70,7 +76,9 @@ class GeminiService {
           );
         }
         if (response.statusCode == 401) {
-          throw Exception("API key tidak valid (401). Periksa key Anda.");
+          throw Exception(
+            "API key tidak valid (401). Periksa key di file .env Anda.",
+          );
         }
         if (response.statusCode == 400) {
           throw Exception("Request salah format (400): ${response.body}");

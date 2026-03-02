@@ -1,13 +1,21 @@
 import 'package:device_preview/device_preview.dart';
 import 'package:flutter/foundation.dart'; // untuk kReleaseMode
 import 'package:flutter/material.dart';
+import 'package:flutter_dotenv/flutter_dotenv.dart'; // Import dotenv
 
-import 'ui/home_screen.dart';
+import 'ui/home_screen.dart'; // Sesuaikan jika path kamu berbeda
 
-void main() {
+// Ubah main menjadi async untuk memuat file .env
+Future<void> main() async {
+  // Wajib ditambahkan jika main() menggunakan async
+  WidgetsFlutterBinding.ensureInitialized();
+  
+  // Memuat file .env sebelum aplikasi berjalan
+  await dotenv.load(fileName: ".env");
+
   runApp(
     DevicePreview(
-      enabled: false, // mati otomatis saat build release
+      enabled: !kReleaseMode, // mati otomatis saat build release
       defaultDevice: Devices.ios.iPhone11ProMax,
       devices: [
         Devices.ios.iPhone11ProMax,
