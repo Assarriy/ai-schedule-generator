@@ -1,5 +1,5 @@
 import 'package:flutter/material.dart';
-import 'package:ai_schedule_generator/services/gemini_service.dart'; // Service untuk memanggil AI
+import 'package:ai_schedule_generator/services/gemini_service.dart';
 import 'schedule_result_screen.dart';
 
 class HomeScreen extends StatefulWidget {
@@ -10,57 +10,54 @@ class HomeScreen extends StatefulWidget {
 }
 
 class _HomeScreenState extends State<HomeScreen> {
-  // Menyimpan daftar tugas dalam bentuk List of Map
   final List<Map<String, dynamic>> tasks = [];
-  // Controller untuk mengambil input dari TextField
   final TextEditingController taskController = TextEditingController();
   final TextEditingController durationController = TextEditingController();
-  String? priority; // Menyimpan nilai dropdown
-  bool isLoading = false; // Status loading saat proses AI berjalan
+  String? priority;
+  bool isLoading = false;
 
   @override
   void dispose() {
-    // Controller harus dibersihkan agar tidak memory leak
     taskController.dispose();
     durationController.dispose();
     super.dispose();
   }
 
-  // ... (methods & build di step berikutnya)
   void _addTask() {
-    // Validasi sederhana: semua field harus terisi
     if (taskController.text.isNotEmpty &&
         durationController.text.isNotEmpty &&
         priority != null) {
       setState(() {
-        // Tambahkan data ke list
         tasks.add({
           "name": taskController.text,
           "priority": priority!,
           "duration": int.tryParse(durationController.text) ?? 30,
         });
       });
-      // Reset form setelah input berhasil
       taskController.clear();
       durationController.clear();
       setState(() => priority = null);
+      FocusScope.of(context).unfocus(); // Tutup keyboard setelah tambah
     }
   }
 
   void _generateSchedule() async {
-    // Jika belum ada tugas, tampilkan peringatan
     if (tasks.isEmpty) {
       ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(content: Text("⚠ Harap tambahkan tugas dulu!")),
+        SnackBar(
+          content: const Text("⚠ Tambahkan tugas dulu, Bro!"),
+          behavior: SnackBarBehavior.floating,
+          shape: RoundedRectangleBorder(
+            borderRadius: BorderRadius.circular(10),
+          ),
+        ),
       );
       return;
     }
-    setState(() => isLoading = true); // Aktifkan loading
+    setState(() => isLoading = true);
     try {
-      // Proses asynchronous ke AI service
       String schedule = await GeminiService.generateSchedule(tasks);
-      if (!mounted) return; // Pastikan widget masih aktif
-      // Navigasi ke halaman hasil
+      if (!mounted) return;
       Navigator.push(
         context,
         MaterialPageRoute(
@@ -68,12 +65,10 @@ class _HomeScreenState extends State<HomeScreen> {
         ),
       );
     } catch (e) {
-      // Tampilkan error jika gagal
       ScaffoldMessenger.of(context).showSnackBar(
         SnackBar(content: Text("Error: $e"), backgroundColor: Colors.red),
       );
     } finally {
-      // Loading dimatikan baik sukses maupun gagal
       if (mounted) setState(() => isLoading = false);
     }
   }
@@ -81,148 +76,255 @@ class _HomeScreenState extends State<HomeScreen> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      appBar: AppBar(title: const Text("AI Schedule Generator")),
+      backgroundColor: const Color(
+        0xFFF8FAFF,
+      ), // Warna background yang lebih soft
+      appBar: AppBar(
+        elevation: 0,
+        backgroundColor: Colors.transparent,
+        centerTitle: true,
+        title: const Text(
+          "AI Schedule",
+          style: TextStyle(
+            color: Colors.black,
+            fontWeight: FontWeight.bold,
+            letterSpacing: 1.2,
+          ),
+        ),
+      ),
       body: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          // FORM INPUT TUGAS
-          Card(
-            margin: const EdgeInsets.all(16),
-            child: Padding(
-              padding: const EdgeInsets.all(16.0),
-              child: Column(
-                children: [
-                  TextField(
-                    controller: taskController,
-                    decoration: const InputDecoration(
-                      labelText: "Nama Tugas",
-                      prefixIcon: Icon(Icons.task),
-                      border: OutlineInputBorder(),
-                    ),
-                  ),
-                  const SizedBox(height: 10),
-                  Row(
-                    children: [
-                      // Input durasi
-                      Expanded(
-                        child: TextField(
-                          controller: durationController,
-                          keyboardType: TextInputType.number,
-                          decoration: const InputDecoration(
-                            labelText: "Durasi (Menit)",
-                            prefixIcon: Icon(Icons.timer),
-                            border: OutlineInputBorder(),
-                          ),
-                        ),
-                      ),
-                      const SizedBox(width: 10),
-                      // Dropdown prioritas
-                      Expanded(
-                        child: DropdownButtonFormField<String>(
-                          value: priority,
-                          decoration: const InputDecoration(
-                            labelText: "Prioritas",
-                            border: OutlineInputBorder(),
-                            prefixIcon: Icon(Icons.flag),
-                          ),
-                          items: ["Tinggi", "Sedang", "Rendah"]
-                              .map(
-                                (e) =>
-                                    DropdownMenuItem(value: e, child: Text(e)),
-                              )
-                              .toList(),
-                          onChanged: (val) => setState(() => priority = val),
-                        ),
-                      ),
-                    ],
-                  ),
-                  const SizedBox(height: 20),
-                  // Tombol tambah tugas
-                  SizedBox(
-                    height: 50,
-                    width: double.infinity,
-                    child: ElevatedButton.icon(
-                      onPressed: _addTask,
-                      icon: const Icon(Icons.add),
-                      label: const Text("Tambah ke Daftar"),
-                    ),
-                  ),
-                ],
+          _buildInputSection(),
+          const Padding(
+            padding: EdgeInsets.symmetric(horizontal: 24, vertical: 8),
+            child: Text(
+              "Daftar Tugas Kamu",
+              style: TextStyle(
+                fontSize: 18,
+                fontWeight: FontWeight.bold,
+                color: Colors.blueGrey,
               ),
             ),
           ),
-          // LIST TUGAS
-          Expanded(
-            child: tasks.isEmpty
-                ? const Center(
-                    child: Text(
-                      "Belum ada tugas. Tambahkan tugas di atas!",
-                      textAlign: TextAlign.center,
-                    ),
-                  )
-                : ListView.builder(
-                    itemCount: tasks.length,
-                    itemBuilder: (context, index) {
-                      final task = tasks[index];
-                      // Dismissible = swipe untuk hapus
-                      return Dismissible(
-                        key: Key(task['name']),
-                        background: Container(color: Colors.red),
-                        onDismissed: (_) =>
-                            setState(() => tasks.removeAt(index)),
-                        child: Card(
-                          margin: const EdgeInsets.symmetric(
-                            horizontal: 16,
-                            vertical: 4,
-                          ),
-                          child: ListTile(
-                            // Avatar warna berdasarkan prioritas
-                            leading: CircleAvatar(
-                              backgroundColor: _getColor(task['priority']),
-                              child: Text(
-                                task['name'][0].toUpperCase(),
-                                style: const TextStyle(color: Colors.white),
-                              ),
-                            ),
-                            title: Text(
-                              task['name'],
-                              style: const TextStyle(
-                                fontWeight: FontWeight.bold,
-                              ),
-                            ),
-                            subtitle: Text(
-                              "${task['duration']} Menit • ${task['priority']}",
-                            ),
-                            trailing: IconButton(
-                              icon: const Icon(Icons.delete, color: Colors.red),
-                              onPressed: () =>
-                                  setState(() => tasks.removeAt(index)),
-                            ),
-                          ),
-                        ),
-                      );
-                    },
-                  ),
+          Expanded(child: _buildTaskList()),
+        ],
+      ),
+      floatingActionButtonLocation: FloatingActionButtonLocation.centerFloat,
+      floatingActionButton: _buildGenerateButton(),
+    );
+  }
+
+  Widget _buildInputSection() {
+    return Container(
+      padding: const EdgeInsets.all(20),
+      margin: const EdgeInsets.all(16),
+      decoration: BoxDecoration(
+        color: Colors.white,
+        borderRadius: BorderRadius.circular(24),
+        boxShadow: [
+          BoxShadow(
+            color: Colors.blue.withOpacity(0.05),
+            blurRadius: 20,
+            offset: const Offset(0, 10),
           ),
         ],
       ),
-      // FAB GENERATE AI
-      floatingActionButton: FloatingActionButton.extended(
-        onPressed: isLoading ? null : _generateSchedule,
-        icon: isLoading
-            ? const SizedBox(
-                width: 20,
-                height: 20,
-                child: CircularProgressIndicator(color: Colors.white),
-              )
-            : const Icon(Icons.auto_awesome),
-        label: Text(isLoading ? "Memproses..." : "Buat Jadwal AI"),
+      child: Column(
+        children: [
+          TextField(
+            controller: taskController,
+            decoration: _inputStyle("Nama Tugas", Icons.assignment_outlined),
+          ),
+          const SizedBox(height: 12),
+          Row(
+            children: [
+              Expanded(
+                child: TextField(
+                  controller: durationController,
+                  keyboardType: TextInputType.number,
+                  decoration: _inputStyle("Durasi (Min)", Icons.timer_outlined),
+                ),
+              ),
+              const SizedBox(width: 12),
+              Expanded(
+                child: DropdownButtonFormField<String>(
+                  value: priority,
+                  decoration: _inputStyle("Prioritas", Icons.flag_outlined),
+                  items: ["Tinggi", "Sedang", "Rendah"]
+                      .map((e) => DropdownMenuItem(value: e, child: Text(e)))
+                      .toList(),
+                  onChanged: (val) => setState(() => priority = val),
+                ),
+              ),
+            ],
+          ),
+          const SizedBox(height: 16),
+          ElevatedButton(
+            onPressed: _addTask,
+            style: ElevatedButton.styleFrom(
+              backgroundColor: Colors.indigoAccent,
+              foregroundColor: Colors.white,
+              minimumSize: const Size(double.infinity, 50),
+              shape: RoundedRectangleBorder(
+                borderRadius: BorderRadius.circular(12),
+              ),
+              elevation: 0,
+            ),
+            child: const Text(
+              "Tambah ke Antrean",
+              style: TextStyle(fontWeight: FontWeight.bold),
+            ),
+          ),
+        ],
       ),
     );
   }
 
+  Widget _buildTaskList() {
+    if (tasks.isEmpty) {
+      return Center(
+        child: Opacity(
+          opacity: 0.5,
+          child: Column(
+            mainAxisAlignment: MainAxisAlignment.center,
+            children: const [
+              Icon(Icons.auto_fix_high, size: 64, color: Colors.blueGrey),
+              SizedBox(height: 16),
+              Text(
+                "Belum ada tugas.\nBiarkan AI mengatur harimu!",
+                textAlign: TextAlign.center,
+              ),
+            ],
+          ),
+        ),
+      );
+    }
+    return ListView.builder(
+      padding: const EdgeInsets.only(bottom: 100), // Agar tidak tertutup FAB
+      itemCount: tasks.length,
+      itemBuilder: (context, index) {
+        final task = tasks[index];
+        return Dismissible(
+          key: UniqueKey(),
+          direction: DismissDirection.endToStart,
+          background: _buildSwipeAction(),
+          onDismissed: (_) => setState(() => tasks.removeAt(index)),
+          child: Container(
+            margin: const EdgeInsets.symmetric(horizontal: 16, vertical: 6),
+            decoration: BoxDecoration(
+              color: Colors.white,
+              borderRadius: BorderRadius.circular(16),
+              border: Border.all(color: Colors.blue.withOpacity(0.1)),
+            ),
+            child: ListTile(
+              leading: Container(
+                padding: const EdgeInsets.all(10),
+                decoration: BoxDecoration(
+                  color: _getColor(task['priority']).withOpacity(0.1),
+                  shape: BoxShape.circle,
+                ),
+                child: Icon(Icons.bolt, color: _getColor(task['priority'])),
+              ),
+              title: Text(
+                task['name'],
+                style: const TextStyle(fontWeight: FontWeight.w600),
+              ),
+              subtitle: Text("${task['duration']} Menit • ${task['priority']}"),
+              trailing: const Icon(Icons.drag_handle, color: Colors.grey),
+            ),
+          ),
+        );
+      },
+    );
+  }
+
+  Widget _buildGenerateButton() {
+    return Container(
+      height: 60,
+      margin: const EdgeInsets.symmetric(horizontal: 24),
+      decoration: BoxDecoration(
+        borderRadius: BorderRadius.circular(30),
+        gradient: const LinearGradient(
+          colors: [
+            Color(0xFF6366F1),
+            Color(0xFFA855F7),
+          ], // Gradient ala AI modern
+        ),
+        boxShadow: [
+          BoxShadow(
+            color: const Color(0xFF6366F1).withOpacity(0.3),
+            blurRadius: 15,
+            offset: const Offset(0, 8),
+          ),
+        ],
+      ),
+      child: Material(
+        color: Colors.transparent,
+        child: InkWell(
+          borderRadius: BorderRadius.circular(30),
+          onTap: isLoading ? null : _generateSchedule,
+          child: Center(
+            child: isLoading
+                ? const SizedBox(
+                    width: 24,
+                    height: 24,
+                    child: CircularProgressIndicator(
+                      color: Colors.white,
+                      strokeWidth: 2,
+                    ),
+                  )
+                : Row(
+                    mainAxisAlignment: MainAxisAlignment.center,
+                    children: const [
+                      Icon(Icons.auto_awesome, color: Colors.white),
+                      SizedBox(width: 8),
+                      Text(
+                        "GENERATE AI SCHEDULE",
+                        style: TextStyle(
+                          color: Colors.white,
+                          fontWeight: FontWeight.bold,
+                          letterSpacing: 1.1,
+                        ),
+                      ),
+                    ],
+                  ),
+          ),
+        ),
+      ),
+    );
+  }
+
+  Widget _buildSwipeAction() {
+    return Container(
+      alignment: Alignment.centerRight,
+      padding: const EdgeInsets.only(right: 20),
+      margin: const EdgeInsets.symmetric(vertical: 6),
+      decoration: BoxDecoration(
+        color: Colors.redAccent,
+        borderRadius: BorderRadius.circular(16),
+      ),
+      child: const Icon(Icons.delete_outline, color: Colors.white),
+    );
+  }
+
+  InputDecoration _inputStyle(String label, IconData icon) {
+    return InputDecoration(
+      labelText: label,
+      prefixIcon: Icon(icon, size: 20),
+      filled: true,
+      fillColor: const Color(0xFFF0F4F8),
+      border: OutlineInputBorder(
+        borderRadius: BorderRadius.circular(12),
+        borderSide: BorderSide.none,
+      ),
+      contentPadding: const EdgeInsets.symmetric(vertical: 16),
+    );
+  }
+
   Color _getColor(String priority) {
-    if (priority == "Tinggi") return Colors.red;
-    if (priority == "Sedang") return Colors.orange;
-    return Colors.green;
+    if (priority == "Tinggi") return Colors.redAccent;
+    if (priority == "Sedang") return Colors.orangeAccent;
+    return Colors.greenAccent;
   }
 }

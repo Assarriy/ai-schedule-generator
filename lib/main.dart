@@ -7,7 +7,7 @@ import 'ui/home_screen.dart';
 void main() {
   runApp(
     DevicePreview(
-      enabled: !kReleaseMode, // mati otomatis saat build release
+      enabled: false, // mati otomatis saat build release
       defaultDevice: Devices.ios.iPhone11ProMax,
       devices: [
         Devices.ios.iPhone11ProMax,
