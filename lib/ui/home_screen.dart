@@ -16,14 +16,16 @@ class _HomeScreenState extends State<HomeScreen> {
   String? priority;
   bool isLoading = false;
 
-  // --- DEFINISI TEMA WARNA MODERN HINGGA ---
-  final Color primaryGreen = const Color(0xFF10B981); // Emerald Green
-  final Color darkGreen = const Color(0xFF047857);
-  final Color softBackground = const Color(
-    0xFFF4F9F4,
-  ); // Putih kehijauan sangat soft
+  // --- TEMA WARNA PREMIUM ---
+  final Color primaryGreen = const Color(
+    0xFF059669,
+  ); // Emerald lebih deep & elegan
+  final Color neonGreen = const Color(
+    0xFF10B981,
+  ); // Emerald terang untuk aksen/glow
+  final Color darkText = const Color(0xFF0F172A); // Slate 900
+  final Color greyText = const Color(0xFF64748B); // Slate 500
   final Color cardColor = Colors.white;
-  final Color textDark = const Color(0xFF1F2937);
 
   @override
   void dispose() {
@@ -54,12 +56,22 @@ class _HomeScreenState extends State<HomeScreen> {
     if (tasks.isEmpty) {
       ScaffoldMessenger.of(context).showSnackBar(
         SnackBar(
-          content: const Text("⚠ Tambahkan tugas dulu, Bro!"),
-          backgroundColor: Colors.orange.shade800,
+          content: Row(
+            children: const [
+              Icon(Icons.warning_amber_rounded, color: Colors.white),
+              SizedBox(width: 10),
+              Text(
+                "Tambahkan tugas dulu, Bro!",
+                style: TextStyle(fontWeight: FontWeight.bold),
+              ),
+            ],
+          ),
+          backgroundColor: const Color(0xFFF59E0B),
           behavior: SnackBarBehavior.floating,
           shape: RoundedRectangleBorder(
-            borderRadius: BorderRadius.circular(10),
+            borderRadius: BorderRadius.circular(16),
           ),
+          margin: const EdgeInsets.all(20),
         ),
       );
       return;
@@ -76,7 +88,14 @@ class _HomeScreenState extends State<HomeScreen> {
       );
     } catch (e) {
       ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(content: Text("Error: $e"), backgroundColor: Colors.red),
+        SnackBar(
+          content: Text("Error: $e"),
+          backgroundColor: const Color(0xFFEF4444),
+          behavior: SnackBarBehavior.floating,
+          shape: RoundedRectangleBorder(
+            borderRadius: BorderRadius.circular(16),
+          ),
+        ),
       );
     } finally {
       if (mounted) setState(() => isLoading = false);
@@ -86,48 +105,122 @@ class _HomeScreenState extends State<HomeScreen> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      backgroundColor: softBackground,
+      extendBodyBehindAppBar: true, // Biar background tembus ke bawah appbar
       appBar: AppBar(
         elevation: 0,
         backgroundColor: Colors.transparent,
-        centerTitle: true,
-        title: Row(
-          mainAxisSize: MainAxisSize.min,
-          children: [
-            Icon(
-              Icons.eco,
-              color: primaryGreen,
-              size: 28,
-            ), // Icon daun yang fresh
-            const SizedBox(width: 8),
-            Text(
-              "AI Schedule",
-              style: TextStyle(
-                color: textDark,
-                fontWeight: FontWeight.w800,
-                letterSpacing: 0.5,
+        toolbarHeight: 80,
+        title: Padding(
+          padding: const EdgeInsets.only(top: 10),
+          child: Row(
+            children: [
+              Container(
+                padding: const EdgeInsets.all(10),
+                decoration: BoxDecoration(
+                  color: Colors.white,
+                  borderRadius: BorderRadius.circular(14),
+                  boxShadow: [
+                    BoxShadow(
+                      color: neonGreen.withOpacity(0.2),
+                      blurRadius: 15,
+                      offset: const Offset(0, 5),
+                    ),
+                  ],
+                ),
+                child: Icon(
+                  Icons.auto_awesome_mosaic,
+                  color: primaryGreen,
+                  size: 24,
+                ),
               ),
-            ),
-          ],
+              const SizedBox(width: 16),
+              Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Text(
+                    "AI Schedule",
+                    style: TextStyle(
+                      color: darkText,
+                      fontWeight: FontWeight.w900,
+                      fontSize: 22,
+                      letterSpacing: -0.5,
+                    ),
+                  ),
+                  Text(
+                    "Smart Planner",
+                    style: TextStyle(
+                      color: primaryGreen,
+                      fontWeight: FontWeight.w600,
+                      fontSize: 12,
+                      letterSpacing: 1.2,
+                    ),
+                  ),
+                ],
+              ),
+            ],
+          ),
         ),
       ),
-      body: Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
-          _buildInputSection(),
-          Padding(
-            padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 8),
-            child: Text(
-              "Daftar Tugas Kamu",
-              style: TextStyle(
-                fontSize: 18,
-                fontWeight: FontWeight.bold,
-                color: textDark.withOpacity(0.8),
-              ),
-            ),
+      body: Container(
+        width: double.infinity,
+        height: double.infinity,
+        decoration: const BoxDecoration(
+          gradient: LinearGradient(
+            begin: Alignment.topLeft,
+            end: Alignment.bottomRight,
+            colors: [
+              Color(0xFFF8FAFC), // Sangat soft blue-grey
+              Color(0xFFECFDF5), // Soft emerald background
+              Color(0xFFF8FAFC),
+            ],
+            stops: [0.0, 0.5, 1.0],
           ),
-          Expanded(child: _buildTaskList()),
-        ],
+        ),
+        child: SafeArea(
+          bottom: false,
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              _buildInputSection(),
+              Padding(
+                padding: const EdgeInsets.fromLTRB(24, 16, 24, 12),
+                child: Row(
+                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                  children: [
+                    Text(
+                      "Task Queue",
+                      style: TextStyle(
+                        fontSize: 20,
+                        fontWeight: FontWeight.w800,
+                        color: darkText,
+                        letterSpacing: -0.5,
+                      ),
+                    ),
+                    Container(
+                      padding: const EdgeInsets.symmetric(
+                        horizontal: 12,
+                        vertical: 6,
+                      ),
+                      decoration: BoxDecoration(
+                        color: neonGreen.withOpacity(0.15),
+                        borderRadius: BorderRadius.circular(20),
+                      ),
+                      child: Text(
+                        "${tasks.length} Tugas",
+                        style: TextStyle(
+                          color: primaryGreen,
+                          fontWeight: FontWeight.bold,
+                          fontSize: 12,
+                        ),
+                      ),
+                    ),
+                  ],
+                ),
+              ),
+              Expanded(child: _buildTaskList()),
+            ],
+          ),
+        ),
       ),
       floatingActionButtonLocation: FloatingActionButtonLocation.centerFloat,
       floatingActionButton: _buildGenerateButton(),
@@ -136,64 +229,104 @@ class _HomeScreenState extends State<HomeScreen> {
 
   Widget _buildInputSection() {
     return Container(
-      padding: const EdgeInsets.all(20),
-      margin: const EdgeInsets.all(16),
+      padding: const EdgeInsets.all(24),
+      margin: const EdgeInsets.symmetric(horizontal: 20, vertical: 10),
       decoration: BoxDecoration(
         color: cardColor,
-        borderRadius: BorderRadius.circular(24),
+        borderRadius: BorderRadius.circular(32),
         boxShadow: [
           BoxShadow(
-            color: primaryGreen.withOpacity(0.08), // Shadow kehijauan
-            blurRadius: 24,
-            offset: const Offset(0, 8),
+            color: const Color(0xFF64748B).withOpacity(0.08),
+            blurRadius: 32,
+            offset: const Offset(0, 16),
           ),
         ],
       ),
       child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
         children: [
+          Text(
+            "What needs to be done?",
+            style: TextStyle(
+              fontSize: 16,
+              fontWeight: FontWeight.bold,
+              color: greyText,
+            ),
+          ),
+          const SizedBox(height: 20),
           TextField(
             controller: taskController,
-            decoration: _inputStyle("Nama Tugas", Icons.assignment_outlined),
+            style: TextStyle(fontWeight: FontWeight.w600, color: darkText),
+            decoration: _inputStyle("Nama Tugas", Icons.edit_note_rounded),
           ),
-          const SizedBox(height: 12),
+          const SizedBox(height: 16),
           Row(
             children: [
               Expanded(
                 child: TextField(
                   controller: durationController,
                   keyboardType: TextInputType.number,
-                  decoration: _inputStyle("Durasi (Min)", Icons.timer_outlined),
+                  style: TextStyle(
+                    fontWeight: FontWeight.w600,
+                    color: darkText,
+                  ),
+                  decoration: _inputStyle("Mins", Icons.timer_outlined),
                 ),
               ),
-              const SizedBox(width: 12),
+              const SizedBox(width: 16),
               Expanded(
+                flex: 2,
                 child: DropdownButtonFormField<String>(
                   value: priority,
-                  decoration: _inputStyle("Prioritas", Icons.flag_outlined),
+                  dropdownColor: Colors.white,
+                  borderRadius: BorderRadius.circular(16),
+                  decoration: _inputStyle("Prioritas", Icons.flag_rounded),
                   items: ["Tinggi", "Sedang", "Rendah"]
-                      .map((e) => DropdownMenuItem(value: e, child: Text(e)))
+                      .map(
+                        (e) => DropdownMenuItem(
+                          value: e,
+                          child: Text(
+                            e,
+                            style: const TextStyle(fontWeight: FontWeight.w600),
+                          ),
+                        ),
+                      )
                       .toList(),
                   onChanged: (val) => setState(() => priority = val),
-                  icon: Icon(Icons.keyboard_arrow_down, color: primaryGreen),
+                  icon: Icon(
+                    Icons.keyboard_arrow_down_rounded,
+                    color: primaryGreen,
+                  ),
                 ),
               ),
             ],
           ),
-          const SizedBox(height: 16),
+          const SizedBox(height: 24),
           ElevatedButton(
             onPressed: _addTask,
             style: ElevatedButton.styleFrom(
-              backgroundColor: primaryGreen, // Warna tombol hijau
+              backgroundColor: darkText, // Tombol add warna gelap biar kontras
               foregroundColor: Colors.white,
-              minimumSize: const Size(double.infinity, 54),
+              minimumSize: const Size(double.infinity, 56),
               shape: RoundedRectangleBorder(
-                borderRadius: BorderRadius.circular(16),
+                borderRadius: BorderRadius.circular(18),
               ),
               elevation: 0,
             ),
-            child: const Text(
-              "Tambah ke Antrean",
-              style: TextStyle(fontWeight: FontWeight.bold, fontSize: 16),
+            child: Row(
+              mainAxisAlignment: MainAxisAlignment.center,
+              children: const [
+                Icon(Icons.add_circle_outline, size: 20),
+                SizedBox(width: 8),
+                Text(
+                  "Add Task",
+                  style: TextStyle(
+                    fontWeight: FontWeight.bold,
+                    fontSize: 16,
+                    letterSpacing: 0.5,
+                  ),
+                ),
+              ],
             ),
           ),
         ],
@@ -204,73 +337,140 @@ class _HomeScreenState extends State<HomeScreen> {
   Widget _buildTaskList() {
     if (tasks.isEmpty) {
       return Center(
-        child: Opacity(
-          opacity: 0.6,
-          child: Column(
-            mainAxisAlignment: MainAxisAlignment.center,
-            children: [
-              Icon(
-                Icons.check_circle_outline,
-                size: 72,
-                color: primaryGreen.withOpacity(0.5),
+        child: Column(
+          mainAxisAlignment: MainAxisAlignment.center,
+          children: [
+            Container(
+              padding: const EdgeInsets.all(24),
+              decoration: BoxDecoration(
+                color: neonGreen.withOpacity(0.1),
+                shape: BoxShape.circle,
               ),
-              const SizedBox(height: 16),
-              Text(
-                "Belum ada tugas.\nSiap jadi produktif hari ini?",
-                textAlign: TextAlign.center,
-                style: TextStyle(color: textDark, fontSize: 16),
+              child: Icon(
+                Icons.task_alt_rounded,
+                size: 64,
+                color: primaryGreen,
               ),
-            ],
-          ),
+            ),
+            const SizedBox(height: 24),
+            Text(
+              "Semua beres!",
+              style: TextStyle(
+                fontSize: 22,
+                fontWeight: FontWeight.bold,
+                color: darkText,
+              ),
+            ),
+            const SizedBox(height: 8),
+            Text(
+              "Tambahkan tugas untuk mulai\nmenyusun jadwal AI kamu.",
+              textAlign: TextAlign.center,
+              style: TextStyle(color: greyText, fontSize: 15, height: 1.5),
+            ),
+            const SizedBox(height: 80), // Jarak untuk FAB
+          ],
         ),
       );
     }
+
     return ListView.builder(
-      padding: const EdgeInsets.only(bottom: 100),
+      padding: const EdgeInsets.only(bottom: 120, top: 8),
       itemCount: tasks.length,
       itemBuilder: (context, index) {
         final task = tasks[index];
+        final priorityColor = _getColor(task['priority']);
+
         return Dismissible(
           key: UniqueKey(),
           direction: DismissDirection.endToStart,
           background: _buildSwipeAction(),
           onDismissed: (_) => setState(() => tasks.removeAt(index)),
           child: Container(
-            margin: const EdgeInsets.symmetric(horizontal: 16, vertical: 6),
+            margin: const EdgeInsets.symmetric(horizontal: 20, vertical: 8),
             decoration: BoxDecoration(
               color: cardColor,
-              borderRadius: BorderRadius.circular(16),
-              border: Border.all(color: Colors.grey.withOpacity(0.1)),
+              borderRadius: BorderRadius.circular(20),
               boxShadow: [
                 BoxShadow(
-                  color: Colors.black.withOpacity(0.02),
-                  blurRadius: 8,
-                  offset: const Offset(0, 2),
+                  color: const Color(0xFF64748B).withOpacity(0.06),
+                  blurRadius: 20,
+                  offset: const Offset(0, 10),
                 ),
               ],
             ),
-            child: ListTile(
-              contentPadding: const EdgeInsets.symmetric(
-                horizontal: 16,
-                vertical: 4,
-              ),
-              leading: Container(
-                padding: const EdgeInsets.all(10),
+            child: ClipRRect(
+              borderRadius: BorderRadius.circular(20),
+              child: Container(
                 decoration: BoxDecoration(
-                  color: _getColor(task['priority']).withOpacity(0.15),
-                  shape: BoxShape.circle,
+                  border: Border(
+                    left: BorderSide(
+                      color: priorityColor,
+                      width: 6,
+                    ), // Garis prioritas tebal di kiri
+                  ),
                 ),
-                child: Icon(Icons.bolt, color: _getColor(task['priority'])),
+                child: ListTile(
+                  contentPadding: const EdgeInsets.symmetric(
+                    horizontal: 20,
+                    vertical: 8,
+                  ),
+                  title: Text(
+                    task['name'],
+                    style: TextStyle(
+                      fontWeight: FontWeight.bold,
+                      color: darkText,
+                      fontSize: 16,
+                    ),
+                  ),
+                  subtitle: Padding(
+                    padding: const EdgeInsets.only(top: 6),
+                    child: Row(
+                      children: [
+                        Icon(Icons.schedule, size: 14, color: greyText),
+                        const SizedBox(width: 4),
+                        Text(
+                          "${task['duration']} Mins",
+                          style: TextStyle(
+                            color: greyText,
+                            fontWeight: FontWeight.w500,
+                          ),
+                        ),
+                        const SizedBox(width: 12),
+                        Container(
+                          padding: const EdgeInsets.symmetric(
+                            horizontal: 8,
+                            vertical: 2,
+                          ),
+                          decoration: BoxDecoration(
+                            color: priorityColor.withOpacity(0.1),
+                            borderRadius: BorderRadius.circular(6),
+                          ),
+                          child: Text(
+                            task['priority'],
+                            style: TextStyle(
+                              color: priorityColor,
+                              fontSize: 11,
+                              fontWeight: FontWeight.w700,
+                            ),
+                          ),
+                        ),
+                      ],
+                    ),
+                  ),
+                  trailing: Container(
+                    padding: const EdgeInsets.all(8),
+                    decoration: BoxDecoration(
+                      color: const Color(0xFFF1F5F9),
+                      borderRadius: BorderRadius.circular(10),
+                    ),
+                    child: Icon(
+                      Icons.drag_indicator_rounded,
+                      color: greyText,
+                      size: 20,
+                    ),
+                  ),
+                ),
               ),
-              title: Text(
-                task['name'],
-                style: TextStyle(fontWeight: FontWeight.w700, color: textDark),
-              ),
-              subtitle: Text(
-                "${task['duration']} Menit • ${task['priority']}",
-                style: TextStyle(color: Colors.grey.shade600),
-              ),
-              trailing: Icon(Icons.drag_indicator, color: Colors.grey.shade400),
             ),
           ),
         );
@@ -280,19 +480,20 @@ class _HomeScreenState extends State<HomeScreen> {
 
   Widget _buildGenerateButton() {
     return Container(
-      height: 60,
-      margin: const EdgeInsets.symmetric(horizontal: 24),
+      height: 64,
+      width: double.infinity,
+      margin: const EdgeInsets.symmetric(horizontal: 24, vertical: 10),
       decoration: BoxDecoration(
-        borderRadius: BorderRadius.circular(30),
+        borderRadius: BorderRadius.circular(20),
         gradient: LinearGradient(
-          colors: [primaryGreen, darkGreen],
+          colors: [primaryGreen, const Color(0xFF047857)],
           begin: Alignment.topLeft,
           end: Alignment.bottomRight,
         ),
         boxShadow: [
           BoxShadow(
-            color: primaryGreen.withOpacity(0.4),
-            blurRadius: 20,
+            color: neonGreen.withOpacity(0.4),
+            blurRadius: 24,
             offset: const Offset(0, 8),
           ),
         ],
@@ -300,29 +501,41 @@ class _HomeScreenState extends State<HomeScreen> {
       child: Material(
         color: Colors.transparent,
         child: InkWell(
-          borderRadius: BorderRadius.circular(30),
+          borderRadius: BorderRadius.circular(20),
           onTap: isLoading ? null : _generateSchedule,
           child: Center(
             child: isLoading
                 ? const SizedBox(
-                    width: 24,
-                    height: 24,
+                    width: 28,
+                    height: 28,
                     child: CircularProgressIndicator(
                       color: Colors.white,
-                      strokeWidth: 2.5,
+                      strokeWidth: 3,
                     ),
                   )
                 : Row(
                     mainAxisAlignment: MainAxisAlignment.center,
-                    children: const [
-                      Icon(Icons.auto_awesome, color: Colors.white),
-                      SizedBox(width: 8),
-                      Text(
-                        "GENERATE AI SCHEDULE",
+                    children: [
+                      Container(
+                        padding: const EdgeInsets.all(6),
+                        decoration: BoxDecoration(
+                          color: Colors.white.withOpacity(0.2),
+                          borderRadius: BorderRadius.circular(10),
+                        ),
+                        child: const Icon(
+                          Icons.bolt_rounded,
+                          color: Colors.white,
+                          size: 20,
+                        ),
+                      ),
+                      const SizedBox(width: 12),
+                      const Text(
+                        "GENERATE SCHEDULE",
                         style: TextStyle(
                           color: Colors.white,
-                          fontWeight: FontWeight.bold,
-                          letterSpacing: 1.2,
+                          fontWeight: FontWeight.w800,
+                          fontSize: 15,
+                          letterSpacing: 1.5,
                         ),
                       ),
                     ],
@@ -336,39 +549,52 @@ class _HomeScreenState extends State<HomeScreen> {
   Widget _buildSwipeAction() {
     return Container(
       alignment: Alignment.centerRight,
-      padding: const EdgeInsets.only(right: 20),
-      margin: const EdgeInsets.symmetric(vertical: 6, horizontal: 16),
+      padding: const EdgeInsets.only(right: 24),
+      margin: const EdgeInsets.symmetric(vertical: 8, horizontal: 20),
       decoration: BoxDecoration(
-        color: const Color(0xFFEF4444), // Red 500
-        borderRadius: BorderRadius.circular(16),
+        color: const Color(0xFFEF4444),
+        borderRadius: BorderRadius.circular(20),
       ),
-      child: const Icon(Icons.delete_sweep, color: Colors.white, size: 28),
+      child: const Icon(
+        Icons.delete_sweep_rounded,
+        color: Colors.white,
+        size: 32,
+      ),
     );
   }
 
   InputDecoration _inputStyle(String label, IconData icon) {
     return InputDecoration(
       labelText: label,
-      labelStyle: TextStyle(color: Colors.grey.shade600),
-      prefixIcon: Icon(icon, size: 22, color: primaryGreen),
+      labelStyle: TextStyle(color: greyText, fontWeight: FontWeight.w500),
+      floatingLabelStyle: TextStyle(
+        color: primaryGreen,
+        fontWeight: FontWeight.bold,
+      ),
+      prefixIcon: Icon(icon, size: 22, color: greyText),
       filled: true,
-      fillColor: const Color(0xFFF9FAFB), // Sangat light grey/white
+      fillColor: const Color(
+        0xFFF8FAFC,
+      ), // Warna abu-abu super terang untuk input
       enabledBorder: OutlineInputBorder(
-        borderRadius: BorderRadius.circular(14),
-        borderSide: BorderSide(color: Colors.grey.shade200),
+        borderRadius: BorderRadius.circular(16),
+        borderSide: const BorderSide(
+          color: Colors.transparent,
+        ), // Border hilang saat tidak aktif
       ),
       focusedBorder: OutlineInputBorder(
-        borderRadius: BorderRadius.circular(14),
-        borderSide: BorderSide(color: primaryGreen, width: 1.5),
+        borderRadius: BorderRadius.circular(16),
+        borderSide: BorderSide(color: neonGreen, width: 2),
       ),
-      contentPadding: const EdgeInsets.symmetric(vertical: 16),
+      contentPadding: const EdgeInsets.symmetric(vertical: 18, horizontal: 20),
     );
   }
 
   Color _getColor(String priority) {
-    if (priority == "Tinggi") return const Color(0xFFEF4444); // Merah modern
-    if (priority == "Sedang")
-      return const Color(0xFFF59E0B); // Amber/Orange modern
-    return primaryGreen; // Hijau
+    if (priority == "Tinggi") return const Color(0xFFEF4444); // Red
+    if (priority == "Sedang") return const Color(0xFFF59E0B); // Amber
+    return const Color(
+      0xFF3B82F6,
+    ); // Blue untuk rendah, lebih modern dari hijau
   }
 }
