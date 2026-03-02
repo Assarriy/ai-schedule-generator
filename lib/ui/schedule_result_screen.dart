@@ -1,44 +1,35 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_markdown/flutter_markdown.dart';
-import 'package:url_launcher/url_launcher.dart'; // 1. Import url_launcher
+import 'package:url_launcher/url_launcher.dart';
 
-class TableBuilder extends MarkdownElementBuilder {
-  @override
-  Widget? visitElementAfterWithContext(
-    BuildContext context,
-    dynamic element,
-    TextStyle? preferredStyle,
-    TextStyle? parentStyle,
-  ) {
-    return null;
-  }
-}
+// CLASS TableBuilder SUDAH DIHAPUS KARENA TIDAK DIPERLUKAN
 
 class ScheduleResultScreen extends StatelessWidget {
   final String scheduleResult;
   const ScheduleResultScreen({super.key, required this.scheduleResult});
 
-  // 2. Fungsi untuk Export ke Google Calendar
+  final Color primaryGreen = const Color(0xFF10B981);
+  final Color darkGreen = const Color(0xFF047857);
+  final Color softBackground = const Color(0xFFF4F9F4);
+  final Color textDark = const Color(0xFF1F2937);
+
   Future<void> _exportToCalendar(BuildContext context) async {
-    // Encode teks agar aman disisipkan ke dalam URL (menghindari error karena spasi/karakter khusus)
     final String encodedDetails = Uri.encodeComponent(scheduleResult);
     final String encodedTitle = Uri.encodeComponent("Jadwal AI Generator");
 
-    // Format URL Template Google Calendar
     final Uri url = Uri.parse(
       'https://calendar.google.com/calendar/render?action=TEMPLATE&text=$encodedTitle&details=$encodedDetails',
     );
 
     try {
-      // Gunakan externalApplication agar di Android membuka browser luar/app kalender
       if (!await launchUrl(url, mode: LaunchMode.externalApplication)) {
         throw 'Gagal membuka $url';
       }
     } catch (e) {
       if (context.mounted) {
         ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(content: Text("Error: Tidak dapat membuka kalender")),
+          const SnackBar(content: Text("Error: Tidak dapat membuka kalender")),
         );
       }
     }
@@ -47,17 +38,28 @@ class ScheduleResultScreen extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      backgroundColor: Colors.grey[50],
+      backgroundColor: softBackground,
       appBar: AppBar(
-        title: const Text("Hasil Jadwal Optimal"),
+        title: const Text(
+          "Hasil Jadwal Optimal",
+          style: TextStyle(fontWeight: FontWeight.bold),
+        ),
+        backgroundColor: primaryGreen,
         actions: [
           IconButton(
-            icon: const Icon(Icons.copy),
+            icon: const Icon(Icons.copy_rounded),
             tooltip: "Salin Jadwal",
             onPressed: () {
               Clipboard.setData(ClipboardData(text: scheduleResult));
               ScaffoldMessenger.of(context).showSnackBar(
-                const SnackBar(content: Text("Jadwal berhasil disalin!")),
+                SnackBar(
+                  content: const Text("Jadwal berhasil disalin!"),
+                  backgroundColor: darkGreen,
+                  behavior: SnackBarBehavior.floating,
+                  shape: RoundedRectangleBorder(
+                    borderRadius: BorderRadius.circular(10),
+                  ),
+                ),
               );
             },
           ),
@@ -70,102 +72,127 @@ class ScheduleResultScreen extends StatelessWidget {
             children: [
               Container(
                 padding: const EdgeInsets.symmetric(
-                  vertical: 10,
-                  horizontal: 15,
+                  vertical: 12,
+                  horizontal: 16,
                 ),
                 decoration: BoxDecoration(
-                  color: Colors.indigo.shade50,
-                  borderRadius: BorderRadius.circular(8),
-                  border: Border.all(color: Colors.indigo.shade100),
+                  color: primaryGreen.withOpacity(0.1),
+                  borderRadius: BorderRadius.circular(12),
+                  border: Border.all(color: primaryGreen.withOpacity(0.3)),
                 ),
                 child: Row(
-                  children: const [
-                    Icon(Icons.auto_awesome, color: Colors.indigo),
-                    SizedBox(width: 10),
+                  children: [
+                    Icon(Icons.auto_awesome, color: darkGreen),
+                    const SizedBox(width: 12),
                     Expanded(
                       child: Text(
                         "Jadwal ini disusun otomatis oleh AI berdasarkan prioritas Anda.",
-                        style: TextStyle(color: Colors.indigo, fontSize: 13),
+                        style: TextStyle(
+                          color: darkGreen,
+                          fontSize: 13,
+                          fontWeight: FontWeight.w500,
+                        ),
                       ),
                     ),
                   ],
                 ),
               ),
-              const SizedBox(height: 15),
+              const SizedBox(height: 16),
+
               Expanded(
                 child: Container(
                   decoration: BoxDecoration(
                     color: Colors.white,
-                    borderRadius: BorderRadius.circular(12),
+                    borderRadius: BorderRadius.circular(16),
                     boxShadow: [
                       BoxShadow(
-                        color: Colors.black.withOpacity(0.05),
-                        blurRadius: 10,
-                        offset: const Offset(0, 4),
+                        color: primaryGreen.withOpacity(0.05),
+                        blurRadius: 20,
+                        offset: const Offset(0, 8),
                       ),
                     ],
                   ),
                   child: ClipRRect(
-                    borderRadius: BorderRadius.circular(12),
+                    borderRadius: BorderRadius.circular(16),
+                    // WIDGET MARKDOWN SUDAH DIPERBAIKI
                     child: Markdown(
                       data: scheduleResult,
                       selectable: true,
                       padding: const EdgeInsets.all(20),
                       styleSheet: MarkdownStyleSheet(
-                        p: const TextStyle(
+                        p: TextStyle(
                           fontSize: 15,
                           height: 1.6,
-                          color: Colors.black87,
+                          color: textDark,
                         ),
-                        h1: const TextStyle(
+                        h1: TextStyle(
                           fontSize: 24,
                           fontWeight: FontWeight.bold,
-                          color: Colors.indigo,
+                          color: darkGreen,
                         ),
-                        h2: const TextStyle(
+                        h2: TextStyle(
                           fontSize: 20,
                           fontWeight: FontWeight.bold,
+                          color: textDark,
                         ),
-                        h3: const TextStyle(
+                        h3: TextStyle(
                           fontSize: 18,
                           fontWeight: FontWeight.w600,
-                          color: Colors.indigoAccent,
+                          color: primaryGreen,
                         ),
                         tableBorder: TableBorder.all(
-                          color: Colors.grey,
+                          color: Colors.grey.shade300,
                           width: 1,
                         ),
                         tableHeadAlign: TextAlign.center,
-                        tablePadding: const EdgeInsets.all(8),
+                        tablePadding: const EdgeInsets.all(12),
+                        tableCellsPadding: const EdgeInsets.all(12),
                       ),
-                      builders: {'table': TableBuilder()},
+                      // HAPUS builders: {'table': TableBuilder()} di sini
                     ),
                   ),
                 ),
               ),
-              const SizedBox(height: 15),
+              const SizedBox(height: 16),
+
               SizedBox(
                 width: double.infinity,
-                child: ElevatedButton.icon(
+                height: 52,
+                child: OutlinedButton.icon(
                   onPressed: () => Navigator.pop(context),
-                  icon: const Icon(Icons.refresh),
-                  label: const Text("Buat Jadwal Baru"),
+                  icon: Icon(Icons.refresh, color: primaryGreen),
+                  label: Text(
+                    "Buat Jadwal Baru",
+                    style: TextStyle(
+                      color: primaryGreen,
+                      fontWeight: FontWeight.bold,
+                      fontSize: 16,
+                    ),
+                  ),
+                  style: OutlinedButton.styleFrom(
+                    side: BorderSide(color: primaryGreen, width: 2),
+                    shape: RoundedRectangleBorder(
+                      borderRadius: BorderRadius.circular(16),
+                    ),
+                  ),
                 ),
               ),
-              const SizedBox(
-                height: 80,
-              ), // Jarak tambahan agar list tidak tertutup FAB
+              const SizedBox(height: 80),
             ],
           ),
         ),
       ),
-      // 3. Tambahkan Floating Action Button di sini
+
       floatingActionButton: FloatingActionButton.extended(
         onPressed: () => _exportToCalendar(context),
         icon: const Icon(Icons.edit_calendar),
-        label: const Text("Export ke Calendar"),
-        backgroundColor: Colors.indigoAccent,
+        label: const Text(
+          "Export ke Calendar",
+          style: TextStyle(fontWeight: FontWeight.bold, letterSpacing: 0.5),
+        ),
+        backgroundColor: primaryGreen,
         foregroundColor: Colors.white,
+        elevation: 4,
       ),
       floatingActionButtonLocation: FloatingActionButtonLocation.centerFloat,
     );

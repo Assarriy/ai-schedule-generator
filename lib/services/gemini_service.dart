@@ -7,12 +7,11 @@ class GeminiService {
   static String get apiKey => dotenv.env['GEMINI_API_KEY'] ?? "";
 
   // Gunakan model stabil terbaru (per 2026: gemini-1.5-flash atau gemini-1.5-flash-latest)
-  static const String model = "gemini-1.5-flash";
+  static const String model = "gemini-2.5-flash";
 
   // Endpoint resmi Gemini generateContent
   static const String baseUrl =
-      "https://generativelanguage.googleapis.com/v1beta/models/gemini-1.5-flash-latest:generateContent";
-
+      "https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-flash:generateContent";
   static Future<String> generateSchedule(
     List<Map<String, dynamic>> tasks,
   ) async {
@@ -44,7 +43,7 @@ class GeminiService {
           "temperature": 0.7,
           "topK": 40,
           "topP": 0.95,
-          "maxOutputTokens": 1024,
+          "maxOutputTokens": 4096,
         },
       };
 
@@ -95,20 +94,27 @@ class GeminiService {
 
   // Fungsi untuk membentuk prompt (Prompt Engineering)
   static String _buildPrompt(List<Map<String, dynamic>> tasks) {
-    // Ubah list tugas menjadi format teks terstruktur
     String taskList = tasks
         .map((e) => "- ${e['name']} (${e['duration']} menit)")
         .join("\n");
 
-    // Instruksi ke AI
     return """
 Buatkan jadwal harian yang efisien berdasarkan tugas berikut:
 $taskList
 
-PENTING:
-1. Sajikan output dalam format Markdown Table dengan kolom: Waktu, Kegiatan, Keterangan.
-2. Tambahkan emoji yang relevan.
-3. Berikan intro singkat semangat dan tips di bagian bawah (di luar tabel).
+ATURAN FORMAT WAJIB (SANGAT PENTING):
+1. Berikan intro singkat penyemangat di awal.
+2. WAJIB tinggalkan 2 BARIS KOSONG sebelum mulai membuat tabel.
+3. Tabel WAJIB menggunakan format Markdown dengan garis vertikal (|) di awal dan akhir setiap baris.
+4. Jangan pernah gunakan tag HTML seperti <table>.
+
+Contoh Format Tabel yang Benar:
+
+| Waktu | Kegiatan | Keterangan |
+|---|---|---|
+| 08:00 - 08:30 | Sarapan 🥞 | Persiapan energi |
+| 08:30 - 09:30 | Tugas 1 💻 | Prioritas Tinggi |
+
 """;
   }
 }

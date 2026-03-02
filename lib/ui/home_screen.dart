@@ -16,6 +16,15 @@ class _HomeScreenState extends State<HomeScreen> {
   String? priority;
   bool isLoading = false;
 
+  // --- DEFINISI TEMA WARNA MODERN HINGGA ---
+  final Color primaryGreen = const Color(0xFF10B981); // Emerald Green
+  final Color darkGreen = const Color(0xFF047857);
+  final Color softBackground = const Color(
+    0xFFF4F9F4,
+  ); // Putih kehijauan sangat soft
+  final Color cardColor = Colors.white;
+  final Color textDark = const Color(0xFF1F2937);
+
   @override
   void dispose() {
     taskController.dispose();
@@ -37,7 +46,7 @@ class _HomeScreenState extends State<HomeScreen> {
       taskController.clear();
       durationController.clear();
       setState(() => priority = null);
-      FocusScope.of(context).unfocus(); // Tutup keyboard setelah tambah
+      FocusScope.of(context).unfocus();
     }
   }
 
@@ -46,6 +55,7 @@ class _HomeScreenState extends State<HomeScreen> {
       ScaffoldMessenger.of(context).showSnackBar(
         SnackBar(
           content: const Text("⚠ Tambahkan tugas dulu, Bro!"),
+          backgroundColor: Colors.orange.shade800,
           behavior: SnackBarBehavior.floating,
           shape: RoundedRectangleBorder(
             borderRadius: BorderRadius.circular(10),
@@ -76,34 +86,43 @@ class _HomeScreenState extends State<HomeScreen> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      backgroundColor: const Color(
-        0xFFF8FAFF,
-      ), // Warna background yang lebih soft
+      backgroundColor: softBackground,
       appBar: AppBar(
         elevation: 0,
         backgroundColor: Colors.transparent,
         centerTitle: true,
-        title: const Text(
-          "AI Schedule",
-          style: TextStyle(
-            color: Colors.black,
-            fontWeight: FontWeight.bold,
-            letterSpacing: 1.2,
-          ),
+        title: Row(
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            Icon(
+              Icons.eco,
+              color: primaryGreen,
+              size: 28,
+            ), // Icon daun yang fresh
+            const SizedBox(width: 8),
+            Text(
+              "AI Schedule",
+              style: TextStyle(
+                color: textDark,
+                fontWeight: FontWeight.w800,
+                letterSpacing: 0.5,
+              ),
+            ),
+          ],
         ),
       ),
       body: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
           _buildInputSection(),
-          const Padding(
-            padding: EdgeInsets.symmetric(horizontal: 24, vertical: 8),
+          Padding(
+            padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 8),
             child: Text(
               "Daftar Tugas Kamu",
               style: TextStyle(
                 fontSize: 18,
                 fontWeight: FontWeight.bold,
-                color: Colors.blueGrey,
+                color: textDark.withOpacity(0.8),
               ),
             ),
           ),
@@ -120,13 +139,13 @@ class _HomeScreenState extends State<HomeScreen> {
       padding: const EdgeInsets.all(20),
       margin: const EdgeInsets.all(16),
       decoration: BoxDecoration(
-        color: Colors.white,
+        color: cardColor,
         borderRadius: BorderRadius.circular(24),
         boxShadow: [
           BoxShadow(
-            color: Colors.blue.withOpacity(0.05),
-            blurRadius: 20,
-            offset: const Offset(0, 10),
+            color: primaryGreen.withOpacity(0.08), // Shadow kehijauan
+            blurRadius: 24,
+            offset: const Offset(0, 8),
           ),
         ],
       ),
@@ -155,6 +174,7 @@ class _HomeScreenState extends State<HomeScreen> {
                       .map((e) => DropdownMenuItem(value: e, child: Text(e)))
                       .toList(),
                   onChanged: (val) => setState(() => priority = val),
+                  icon: Icon(Icons.keyboard_arrow_down, color: primaryGreen),
                 ),
               ),
             ],
@@ -163,17 +183,17 @@ class _HomeScreenState extends State<HomeScreen> {
           ElevatedButton(
             onPressed: _addTask,
             style: ElevatedButton.styleFrom(
-              backgroundColor: Colors.indigoAccent,
+              backgroundColor: primaryGreen, // Warna tombol hijau
               foregroundColor: Colors.white,
-              minimumSize: const Size(double.infinity, 50),
+              minimumSize: const Size(double.infinity, 54),
               shape: RoundedRectangleBorder(
-                borderRadius: BorderRadius.circular(12),
+                borderRadius: BorderRadius.circular(16),
               ),
               elevation: 0,
             ),
             child: const Text(
               "Tambah ke Antrean",
-              style: TextStyle(fontWeight: FontWeight.bold),
+              style: TextStyle(fontWeight: FontWeight.bold, fontSize: 16),
             ),
           ),
         ],
@@ -185,15 +205,20 @@ class _HomeScreenState extends State<HomeScreen> {
     if (tasks.isEmpty) {
       return Center(
         child: Opacity(
-          opacity: 0.5,
+          opacity: 0.6,
           child: Column(
             mainAxisAlignment: MainAxisAlignment.center,
-            children: const [
-              Icon(Icons.auto_fix_high, size: 64, color: Colors.blueGrey),
-              SizedBox(height: 16),
+            children: [
+              Icon(
+                Icons.check_circle_outline,
+                size: 72,
+                color: primaryGreen.withOpacity(0.5),
+              ),
+              const SizedBox(height: 16),
               Text(
-                "Belum ada tugas.\nBiarkan AI mengatur harimu!",
+                "Belum ada tugas.\nSiap jadi produktif hari ini?",
                 textAlign: TextAlign.center,
+                style: TextStyle(color: textDark, fontSize: 16),
               ),
             ],
           ),
@@ -201,7 +226,7 @@ class _HomeScreenState extends State<HomeScreen> {
       );
     }
     return ListView.builder(
-      padding: const EdgeInsets.only(bottom: 100), // Agar tidak tertutup FAB
+      padding: const EdgeInsets.only(bottom: 100),
       itemCount: tasks.length,
       itemBuilder: (context, index) {
         final task = tasks[index];
@@ -213,25 +238,39 @@ class _HomeScreenState extends State<HomeScreen> {
           child: Container(
             margin: const EdgeInsets.symmetric(horizontal: 16, vertical: 6),
             decoration: BoxDecoration(
-              color: Colors.white,
+              color: cardColor,
               borderRadius: BorderRadius.circular(16),
-              border: Border.all(color: Colors.blue.withOpacity(0.1)),
+              border: Border.all(color: Colors.grey.withOpacity(0.1)),
+              boxShadow: [
+                BoxShadow(
+                  color: Colors.black.withOpacity(0.02),
+                  blurRadius: 8,
+                  offset: const Offset(0, 2),
+                ),
+              ],
             ),
             child: ListTile(
+              contentPadding: const EdgeInsets.symmetric(
+                horizontal: 16,
+                vertical: 4,
+              ),
               leading: Container(
                 padding: const EdgeInsets.all(10),
                 decoration: BoxDecoration(
-                  color: _getColor(task['priority']).withOpacity(0.1),
+                  color: _getColor(task['priority']).withOpacity(0.15),
                   shape: BoxShape.circle,
                 ),
                 child: Icon(Icons.bolt, color: _getColor(task['priority'])),
               ),
               title: Text(
                 task['name'],
-                style: const TextStyle(fontWeight: FontWeight.w600),
+                style: TextStyle(fontWeight: FontWeight.w700, color: textDark),
               ),
-              subtitle: Text("${task['duration']} Menit • ${task['priority']}"),
-              trailing: const Icon(Icons.drag_handle, color: Colors.grey),
+              subtitle: Text(
+                "${task['duration']} Menit • ${task['priority']}",
+                style: TextStyle(color: Colors.grey.shade600),
+              ),
+              trailing: Icon(Icons.drag_indicator, color: Colors.grey.shade400),
             ),
           ),
         );
@@ -245,16 +284,15 @@ class _HomeScreenState extends State<HomeScreen> {
       margin: const EdgeInsets.symmetric(horizontal: 24),
       decoration: BoxDecoration(
         borderRadius: BorderRadius.circular(30),
-        gradient: const LinearGradient(
-          colors: [
-            Color(0xFF6366F1),
-            Color(0xFFA855F7),
-          ], // Gradient ala AI modern
+        gradient: LinearGradient(
+          colors: [primaryGreen, darkGreen],
+          begin: Alignment.topLeft,
+          end: Alignment.bottomRight,
         ),
         boxShadow: [
           BoxShadow(
-            color: const Color(0xFF6366F1).withOpacity(0.3),
-            blurRadius: 15,
+            color: primaryGreen.withOpacity(0.4),
+            blurRadius: 20,
             offset: const Offset(0, 8),
           ),
         ],
@@ -271,7 +309,7 @@ class _HomeScreenState extends State<HomeScreen> {
                     height: 24,
                     child: CircularProgressIndicator(
                       color: Colors.white,
-                      strokeWidth: 2,
+                      strokeWidth: 2.5,
                     ),
                   )
                 : Row(
@@ -284,7 +322,7 @@ class _HomeScreenState extends State<HomeScreen> {
                         style: TextStyle(
                           color: Colors.white,
                           fontWeight: FontWeight.bold,
-                          letterSpacing: 1.1,
+                          letterSpacing: 1.2,
                         ),
                       ),
                     ],
@@ -299,32 +337,38 @@ class _HomeScreenState extends State<HomeScreen> {
     return Container(
       alignment: Alignment.centerRight,
       padding: const EdgeInsets.only(right: 20),
-      margin: const EdgeInsets.symmetric(vertical: 6),
+      margin: const EdgeInsets.symmetric(vertical: 6, horizontal: 16),
       decoration: BoxDecoration(
-        color: Colors.redAccent,
+        color: const Color(0xFFEF4444), // Red 500
         borderRadius: BorderRadius.circular(16),
       ),
-      child: const Icon(Icons.delete_outline, color: Colors.white),
+      child: const Icon(Icons.delete_sweep, color: Colors.white, size: 28),
     );
   }
 
   InputDecoration _inputStyle(String label, IconData icon) {
     return InputDecoration(
       labelText: label,
-      prefixIcon: Icon(icon, size: 20),
+      labelStyle: TextStyle(color: Colors.grey.shade600),
+      prefixIcon: Icon(icon, size: 22, color: primaryGreen),
       filled: true,
-      fillColor: const Color(0xFFF0F4F8),
-      border: OutlineInputBorder(
-        borderRadius: BorderRadius.circular(12),
-        borderSide: BorderSide.none,
+      fillColor: const Color(0xFFF9FAFB), // Sangat light grey/white
+      enabledBorder: OutlineInputBorder(
+        borderRadius: BorderRadius.circular(14),
+        borderSide: BorderSide(color: Colors.grey.shade200),
+      ),
+      focusedBorder: OutlineInputBorder(
+        borderRadius: BorderRadius.circular(14),
+        borderSide: BorderSide(color: primaryGreen, width: 1.5),
       ),
       contentPadding: const EdgeInsets.symmetric(vertical: 16),
     );
   }
 
   Color _getColor(String priority) {
-    if (priority == "Tinggi") return Colors.redAccent;
-    if (priority == "Sedang") return Colors.orangeAccent;
-    return Colors.greenAccent;
+    if (priority == "Tinggi") return const Color(0xFFEF4444); // Merah modern
+    if (priority == "Sedang")
+      return const Color(0xFFF59E0B); // Amber/Orange modern
+    return primaryGreen; // Hijau
   }
 }

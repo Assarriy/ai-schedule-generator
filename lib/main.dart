@@ -1,26 +1,21 @@
 import 'package:device_preview/device_preview.dart';
-import 'package:flutter/foundation.dart'; // untuk kReleaseMode
+import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
-import 'package:flutter_dotenv/flutter_dotenv.dart'; // Import dotenv
+import 'package:flutter_dotenv/flutter_dotenv.dart';
 
-import 'ui/home_screen.dart'; // Sesuaikan jika path kamu berbeda
+import 'ui/home_screen.dart'; // Sesuaikan path-nya ya Bro
 
-// Ubah main menjadi async untuk memuat file .env
 Future<void> main() async {
-  // Wajib ditambahkan jika main() menggunakan async
   WidgetsFlutterBinding.ensureInitialized();
-  
-  // Memuat file .env sebelum aplikasi berjalan
+
+  // Memuat file .env
   await dotenv.load(fileName: ".env");
 
   runApp(
     DevicePreview(
-      enabled: !kReleaseMode, // mati otomatis saat build release
+      enabled: !kReleaseMode,
       defaultDevice: Devices.ios.iPhone11ProMax,
-      devices: [
-        Devices.ios.iPhone11ProMax,
-        Devices.ios.iPadPro11Inches,
-      ],
+      devices: [Devices.ios.iPhone11ProMax, Devices.ios.iPadPro11Inches],
       builder: (context) => const MainApp(),
     ),
   );
@@ -32,31 +27,31 @@ class MainApp extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return MaterialApp(
-      // Integrasi Device Preview (wajib ketiga baris ini)
       useInheritedMediaQuery: true,
       locale: DevicePreview.locale(context),
       builder: DevicePreview.appBuilder,
-
       debugShowCheckedModeBanner: false,
       title: 'AI Schedule Generator',
 
-      // Tema global menggunakan Material 3
+      // --- TEMA GLOBAL DIUPDATE KE HIJAU MODERN ---
       theme: ThemeData(
         colorScheme: ColorScheme.fromSeed(
-          seedColor: Colors.indigo, // warna brand utama
+          seedColor: const Color(0xFF10B981), // Emerald Green
           brightness: Brightness.light,
         ),
         useMaterial3: true,
-        scaffoldBackgroundColor: Colors.grey[50],
+        scaffoldBackgroundColor: const Color(
+          0xFFF4F9F4,
+        ), // Putih kehijauan soft
         appBarTheme: const AppBarTheme(
-          backgroundColor: Colors.indigo,
+          backgroundColor: Color(0xFF10B981), // Appbar bawaan hijau
           foregroundColor: Colors.white,
           elevation: 0,
           centerTitle: true,
         ),
       ),
 
-      home: const HomeScreen(), // Halaman pertama saat aplikasi dibuka
+      home: const HomeScreen(),
     );
   }
 }
